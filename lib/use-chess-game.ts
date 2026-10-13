@@ -50,11 +50,12 @@ export function useChessGame() {
   }, []);
 
   const animate = useCallback(async (move: Move, epoch: number) => {
+    setEffect({ id: Date.now(), square: move.to, from: move.from, kind: move.piece, color: move.color, captured: !!move.captured, victimSquare: move.flags.includes("e") ? move.to[0] + move.from[1] : move.to, castle: move.flags.includes("k") ? "k" : move.flags.includes("q") ? "q" : undefined });
     if (move.captured) {
-      setEffect({ id: Date.now(), square: move.to, from: move.from, kind: move.piece, color: move.color });
       setMessage(move.piece === "b" || move.piece === "q" ? "Arcane magic strikes!" : move.piece === "n" ? "The knight attacks!" : move.piece === "r" ? "A crushing blow!" : "A blade finds its target!");
     } else setMessage(`${pieceNames[move.piece]} advances to ${move.to.toUpperCase()}`);
-    await new Promise(resolve => setTimeout(resolve, move.captured ? 950 : 150));
+    await new Promise(resolve => setTimeout(resolve, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 200 : move.captured ? 1300 : 700));
+    if (generation.current === epoch) setEffect(null);
     return generation.current === epoch;
   }, []);
 
