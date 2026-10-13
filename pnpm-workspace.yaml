@@ -1,0 +1,6 @@
+nodeLinker: hoisted
+packageImportMethod: copy
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
