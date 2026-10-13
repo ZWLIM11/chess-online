@@ -37,6 +37,28 @@ Run the API integration checks against a local server on port 5173:
 node tests/rooms.integration.mjs
 ```
 
+## Deploy to your own Cloudflare account
+
+Use **Cloudflare Workers** with a **D1 database** for the room API. Connect this repository using branch `main`.
+
+1. Create a D1 database named `arcane-chess` in your Cloudflare account and copy its database UUID.
+2. Create/connect a Worker named `arcane-chess` to this GitHub repository.
+3. Set these **build environment variables**:
+   - `CLOUDFLARE_D1_DATABASE_ID`: your D1 database UUID.
+   - `CLOUDFLARE_D1_DATABASE_NAME`: `arcane-chess` (or your actual database name).
+   - `CLOUDFLARE_WORKER_NAME`: `arcane-chess` (must match the Worker you created).
+   - `NODE_VERSION`: `24.19.0`.
+   - `PNPM_VERSION`: `11.25.0`.
+4. Set build command: `pnpm run build:cloudflare`.
+5. Set deploy command: `pnpm run deploy:cloudflare`.
+6. Use repository root `/`. The deploy command applies the SQL migrations and publishes the Worker with its assets. Ensure the build's Cloudflare API token can edit Workers and D1 in this account.
+
+For local CLI deployment, run `pnpm exec wrangler login`, set the same `CLOUDFLARE_*` variables in your shell, then run the build and deploy commands above. A clean checkout first needs `pnpm install --frozen-lockfile`.
+
+The preparation script configures the generated Worker with your own database. It fails if the database ID is missing or still the Sites placeholder. Cloudflare deployment creates a separate database and URL; rooms on the existing Sites URL are not transferred.
+
+References: [Workers build settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) and [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/).
+
 ## Verification
 
 TypeScript and production build checks pass. Automated tests cover repetition, mate search, legal AI replies, underpromotion, castling, and en passant. Local API integration checks cover simultaneous joins, invalid player tokens, illegal moves, wrong-turn moves, a full checkmate sequence, and token privacy. Browser checks cover a player move, AI reply, undo, camera rotation, and offline reload/AI play with the local server stopped.
